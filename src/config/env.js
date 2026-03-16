@@ -9,7 +9,7 @@ const env={
     db_dialect: process.env.DB_DIALECT,
     bcrypt_salt_rounds: +process.env.BCRYPT_SALT_ROUNDS,
     jwt_secret: process.env.JWT_SECRET,
-    jwt_expires_second:process.env.JWTO_EXPIRES_SECOND,
+    jwt_expires_second: Number(process.env.JWT_EXPIRES_SECOND),
 };
 
 export default env;
