@@ -95,8 +95,15 @@ const activateInactivate = async (req, res) => {
 const eliminar = async (req, res) => {
     const { id } = req.params;
     try {
+        await Task.destroy({ 
+            where: { 
+                userId:id,
+             },
+        });
         await User.destroy({ 
-            where: { id },
+            where: { 
+                id,
+             },
         });
         return res.sendStatus(204); 
     } catch (error) {
