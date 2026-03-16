@@ -3,6 +3,7 @@ import { Task } from "../models/task.js";
 import logger from "../logs/logger.js";
 import { Status } from "../constants/index.js";
 import { encriptar } from "../common/bycript.js";
+import { Op } from "sequelize"; // ✅ agregado para búsqueda ILIKE
 
 async function create(req, res) {
     const { username, password } = req.body;
@@ -94,20 +95,55 @@ const eliminar = async (req, res) => {
 const getTasks = async (req, res) => {
     const { id } = req.params;
     try {
-        const user = await User.findOne({  // ✅ corregido: opciones dentro del paréntesis
+        const user = await User.findOne({
             attributes: ["username"],
             include: [
                 {
                     model: Task,
                     attributes: ["name", "done"],
-                    where: {
-                        done: true
-                    }
+                    where: { done: true }
                 }
             ],
             where: { id },
         });
         return res.json(user);
+    } catch (error) {
+        logger.error(error);
+        return res.json(error.message);
+    }
+};
+
+// ✅ nueva función de paginación
+const listPagination = async (req, res) => {
+    const { 
+        page = 1, 
+        limit = 10, 
+        search = "", 
+        orderBy = "id", 
+        orderDir = "DESC" 
+    } = req.query;
+
+    const offset = (page - 1) * limit;
+
+    try {
+        const users = await User.findAndCountAll({
+            attributes: ["id", "username", "status"],
+            order: [[orderBy, orderDir]],
+            limit: parseInt(limit),
+            offset: parseInt(offset),
+            where: {
+                status: Status.ACTIVE,
+                ...(search && {
+                    username: {
+                        [Op.iLike]: `%${search}%`
+                    }
+                })
+            },
+        });
+        return res.json({
+            total: users.count,
+            data: users.rows
+        });
     } catch (error) {
         logger.error(error);
         return res.json(error.message);
@@ -121,5 +157,6 @@ export default {
     update,
     eliminar,
     activateInactivate,
-    getTasks,  
+    getTasks,
+    listPagination, // ✅ agregado
 };
