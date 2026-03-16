@@ -18,6 +18,7 @@ async function login(req, res) {
         if (!match) return res.status(403).json({ message: "Usuario no autorizado" });
         
         console.log("jwt_expires_second:", env.jwt_expires_second, typeof env.jwt_expires_second);
+        
         const token = jwt.sign({ userId: user.id }, env.jwt_secret, { // ✅ movido antes del return y "jwt_secert" → "jwt_secret"
             expiresIn: Number(env.jwt_expires_second) 
         });
