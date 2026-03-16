@@ -127,19 +127,19 @@ paths:
                   type: string
                   example: "123456"
       responses:
-        200:
+        "200":
           description: Login exitoso
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Token'
-        404:
+        "404":
           description: Usuario no encontrado
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-        403:
+        "403":
           description: Usuario no autorizado
           content:
             application/json:
@@ -153,7 +153,7 @@ paths:
         - Users
       summary: Listar todos los usuarios activos
       responses:
-        200:
+        "200":
           description: Lista de usuarios
           content:
             application/json:
@@ -167,7 +167,6 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/User'
-
     post:
       tags:
         - Users
@@ -179,7 +178,7 @@ paths:
             schema:
               $ref: '#/components/schemas/UserCreate'
       responses:
-        200:
+        "200":
           description: Usuario creado
           content:
             application/json:
@@ -227,13 +226,13 @@ paths:
             enum: [ASC, DESC]
           description: Dirección del ordenamiento
       responses:
-        200:
+        "200":
           description: Lista paginada de usuarios
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaginationResponse'
-        401:
+        "401":
           description: Token requerido
 
   /api/users/{id}:
@@ -251,15 +250,14 @@ paths:
             type: integer
           example: 1
       responses:
-        200:
+        "200":
           description: Usuario encontrado
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
-        404:
+        "404":
           description: Usuario no encontrado
-
     put:
       tags:
         - Users
@@ -279,9 +277,8 @@ paths:
             schema:
               $ref: '#/components/schemas/UserCreate'
       responses:
-        200:
+        "200":
           description: Usuario actualizado
-
     patch:
       tags:
         - Users
@@ -306,13 +303,12 @@ paths:
                   enum: [ACTIVO, INACTIVO]
                   example: INACTIVO
       responses:
-        200:
+        "200":
           description: Status actualizado
-        400:
+        "400":
           description: No existe el status o usuario
-        409:
+        "409":
           description: El usuario ya se encuentra en ese status
-
     delete:
       tags:
         - Users
@@ -326,9 +322,9 @@ paths:
           schema:
             type: integer
       responses:
-        204:
+        "204":
           description: Usuario eliminado exitosamente
-        404:
+        "404":
           description: Usuario no encontrado
 
   /api/users/{id}/tasks:
@@ -345,7 +341,7 @@ paths:
           schema:
             type: integer
       responses:
-        200:
+        "200":
           description: Tareas completadas del usuario
           content:
             application/json:
@@ -368,7 +364,7 @@ paths:
       security:
         - bearerAuth: []
       responses:
-        200:
+        "200":
           description: Lista de tareas
           content:
             application/json:
@@ -381,7 +377,6 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/Task'
-
     post:
       tags:
         - Tasks
@@ -395,13 +390,13 @@ paths:
             schema:
               $ref: '#/components/schemas/TaskCreate'
       responses:
-        200:
+        "200":
           description: Tarea creada
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Task'
-        400:
+        "400":
           description: No existe la tarea
 
   /api/tasks/{id}:
@@ -418,15 +413,14 @@ paths:
           schema:
             type: integer
       responses:
-        200:
+        "200":
           description: Tarea encontrada
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Task'
-        404:
+        "404":
           description: Tarea no encontrada
-
     put:
       tags:
         - Tasks
@@ -446,11 +440,10 @@ paths:
             schema:
               $ref: '#/components/schemas/TaskCreate'
       responses:
-        200:
+        "200":
           description: Tarea actualizada
-        404:
+        "404":
           description: Tarea no encontrada
-
     delete:
       tags:
         - Tasks
@@ -464,11 +457,10 @@ paths:
           schema:
             type: integer
       responses:
-        204:
+        "204":
           description: Tarea eliminada
-        404:
+        "404":
           description: Tarea no encontrada
-
     patch:
       tags:
         - Tasks
@@ -492,7 +484,7 @@ paths:
                   type: boolean
                   example: true
       responses:
-        200:
+        "200":
           description: Tarea actualizada
-        404:
+        "404":
           description: Tarea no encontrada
