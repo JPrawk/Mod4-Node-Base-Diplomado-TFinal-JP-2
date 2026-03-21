@@ -1,22 +1,25 @@
 openapi: 3.0.0
 info:
-  title: Diplomado API
-  description: API REST para gestión de usuarios y tareas
+  title: Mi API - Dip Mod 4 Juan Pablo Guzman
   version: 1.0.0
+  description: Documentación de la API
   contact:
-    name: Jguzman
-
+    name: Juan Guzman
+    email: juan@email.com
+    url: https://github.com/tu-usuario
+  license:
+    name: MIT
 servers:
   - url: http://localhost:3000
-    description: Servidor local
-
+    description: Desarrollo
+  - url: https://tu-app.onrender.com
+    description: Producción
 components:
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
-
   schemas:
     User:
       type: object
@@ -24,92 +27,66 @@ components:
         id:
           type: integer
           example: 1
-        username:
+        name:
           type: string
-          example: juan
-        status:
+          example: Juan Guzman
+        email:
           type: string
-          enum: [ACTIVO, INACTIVO]
-          example: ACTIVO
-
-    UserCreate:
+          format: email
+          example: juan@email.com
+        active:
+          type: boolean
+          example: true
+    UserInput:
       type: object
       required:
-        - username
+        - name
+        - email
         - password
       properties:
-        username:
+        name:
           type: string
-          minLength: 3
-          maxLength: 30
-          pattern: '^[a-zA-Z0-9]+$'
-          example: juan
+          example: Juan Guzman
+        email:
+          type: string
+          format: email
+          example: juan@email.com
         password:
           type: string
-          minLength: 3
-          maxLength: 30
-          pattern: '^[a-zA-Z0-9]{3,30}$'
-          example: "123456"
-        status:
-          type: string
-          enum: [ACTIVO, INACTIVO]
-          example: ACTIVO
-
+          format: password
+          example: '123456'
     Task:
       type: object
       properties:
         id:
           type: integer
           example: 1
-        name:
+        title:
           type: string
-          example: Mi primera tarea
+          example: Mi tarea
+        description:
+          type: string
+          example: Descripción de la tarea
         done:
           type: boolean
           example: false
-
-    TaskCreate:
+    TaskInput:
       type: object
       required:
-        - name
+        - title
       properties:
-        name:
+        title:
           type: string
-          example: Mi primera tarea
-
-    Token:
-      type: object
-      properties:
-        token:
+          example: Mi tarea
+        description:
           type: string
-          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-
-    Error:
-      type: object
-      properties:
-        message:
-          type: string
-          example: Usuario no encontrado
-
-    PaginationResponse:
-      type: object
-      properties:
-        total:
-          type: integer
-          example: 20
-        data:
-          type: array
-          items:
-            $ref: '#/components/schemas/User'
-
+          example: Descripción de la tarea
 paths:
-
-  # ─── AUTH ───────────────────────────────────────────
   /api/login:
     post:
+      summary: Iniciar sesión
       tags:
         - Auth
-      summary: Login de usuario
       requestBody:
         required: true
         content:
@@ -117,270 +94,54 @@ paths:
             schema:
               type: object
               required:
-                - username
+                - email
                 - password
               properties:
-                username:
+                email:
                   type: string
-                  example: juan
+                  format: email
+                  example: usuario@email.com
                 password:
                   type: string
-                  example: "123456"
+                  format: password
+                  example: '123456'
       responses:
-        "200":
-          description: Login exitoso
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Token'
-        "404":
-          description: Usuario no encontrado
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        "403":
-          description: Usuario no autorizado
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-
-  # ─── USERS ──────────────────────────────────────────
-  /api/users:
-    get:
-      tags:
-        - Users
-      summary: Listar todos los usuarios activos
-      responses:
-        "200":
-          description: Lista de usuarios
+        '200':
+          description: Login exitoso, retorna el token JWT
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  total:
-                    type: integer
-                    example: 6
-                  data:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/User'
-    post:
-      tags:
-        - Users
-      summary: Crear usuario
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UserCreate'
-      responses:
-        "200":
-          description: Usuario creado
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/User'
-
-  /api/users/list/pagination:
-    get:
-      tags:
-        - Users
-      summary: Listar usuarios con paginación y filtros
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: page
-          in: query
-          schema:
-            type: integer
-            default: 1
-          description: Número de página
-        - name: limit
-          in: query
-          schema:
-            type: integer
-            default: 10
-            enum: [5, 10, 15, 20]
-          description: Cantidad de registros a mostrar
-        - name: search
-          in: query
-          schema:
-            type: string
-          description: Búsqueda por username (ILIKE)
-        - name: orderBy
-          in: query
-          schema:
-            type: string
-            default: id
-            enum: [id, username, status]
-          description: Campo por ordenar
-        - name: orderDir
-          in: query
-          schema:
-            type: string
-            default: DESC
-            enum: [ASC, DESC]
-          description: Dirección del ordenamiento
-      responses:
-        "200":
-          description: Lista paginada de usuarios
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginationResponse'
-        "401":
-          description: Token requerido
-
-  /api/users/{id}:
-    get:
-      tags:
-        - Users
-      summary: Obtener usuario por ID
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-          example: 1
-      responses:
-        "200":
-          description: Usuario encontrado
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/User'
-        "404":
-          description: Usuario no encontrado
-    put:
-      tags:
-        - Users
-      summary: Actualizar usuario
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UserCreate'
-      responses:
-        "200":
-          description: Usuario actualizado
-    patch:
-      tags:
-        - Users
-      summary: Activar o inactivar usuario
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                status:
-                  type: string
-                  enum: [ACTIVO, INACTIVO]
-                  example: INACTIVO
-      responses:
-        "200":
-          description: Status actualizado
-        "400":
-          description: No existe el status o usuario
-        "409":
-          description: El usuario ya se encuentra en ese status
-    delete:
-      tags:
-        - Users
-      summary: Eliminar usuario y sus tareas
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        "204":
-          description: Usuario eliminado exitosamente
-        "404":
-          description: Usuario no encontrado
-
-  /api/users/{id}/tasks:
-    get:
-      tags:
-        - Users
-      summary: Obtener tareas completadas de un usuario
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        "200":
-          description: Tareas completadas del usuario
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  username:
+                  token:
                     type: string
-                  Tasks:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Task'
-
-  # ─── TASKS ──────────────────────────────────────────
+                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        '400':
+          description: Datos inválidos
+        '401':
+          description: Credenciales incorrectas
   /api/tasks:
     get:
+      summary: Obtener todas las tareas
       tags:
         - Tasks
-      summary: Listar tareas del usuario autenticado
       security:
         - bearerAuth: []
       responses:
-        "200":
+        '200':
           description: Lista de tareas
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  total:
-                    type: integer
-                  data:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Task'
+                type: array
+                items:
+                  $ref: '#/components/schemas/Task'
+        '401':
+          description: No autorizado
     post:
+      summary: Crear una nueva tarea
       tags:
         - Tasks
-      summary: Crear tarea
       security:
         - bearerAuth: []
       requestBody:
@@ -388,48 +149,48 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/TaskCreate'
+              $ref: '#/components/schemas/TaskInput'
       responses:
-        "200":
-          description: Tarea creada
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Task'
-        "400":
-          description: No existe la tarea
-
+        '201':
+          description: Tarea creada exitosamente
+        '400':
+          description: Datos inválidos
+        '401':
+          description: No autorizado
   /api/tasks/{id}:
     get:
+      summary: Obtener una tarea por ID
       tags:
         - Tasks
-      summary: Obtener tarea por ID
       security:
         - bearerAuth: []
       parameters:
-        - name: id
-          in: path
+        - in: path
+          name: id
           required: true
           schema:
             type: integer
+          description: ID de la tarea
       responses:
-        "200":
+        '200':
           description: Tarea encontrada
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Task'
-        "404":
+        '401':
+          description: No autorizado
+        '404':
           description: Tarea no encontrada
     put:
+      summary: Actualizar una tarea completa
       tags:
         - Tasks
-      summary: Actualizar tarea
       security:
         - bearerAuth: []
       parameters:
-        - name: id
-          in: path
+        - in: path
+          name: id
           required: true
           schema:
             type: integer
@@ -438,38 +199,155 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/TaskCreate'
+              $ref: '#/components/schemas/TaskInput'
       responses:
-        "200":
+        '200':
           description: Tarea actualizada
-        "404":
+        '401':
+          description: No autorizado
+        '404':
           description: Tarea no encontrada
     delete:
+      summary: Eliminar una tarea
       tags:
         - Tasks
-      summary: Eliminar tarea
       security:
         - bearerAuth: []
       parameters:
-        - name: id
-          in: path
+        - in: path
+          name: id
           required: true
           schema:
             type: integer
       responses:
-        "204":
+        '200':
           description: Tarea eliminada
-        "404":
+        '401':
+          description: No autorizado
+        '404':
           description: Tarea no encontrada
     patch:
+      summary: Marcar tarea como completada
       tags:
         - Tasks
-      summary: Marcar tarea como completada
       security:
         - bearerAuth: []
       parameters:
-        - name: id
-          in: path
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Tarea marcada como completada
+        '401':
+          description: No autorizado
+        '404':
+          description: Tarea no encontrada
+  /api/users:
+    get:
+      summary: Obtener todos los usuarios
+      tags:
+        - Users
+      responses:
+        '200':
+          description: Lista de usuarios
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+    post:
+      summary: Crear un nuevo usuario
+      tags:
+        - Users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserInput'
+      responses:
+        '201':
+          description: Usuario creado exitosamente
+        '400':
+          description: Datos inválidos
+  /api/users/list/pagination:
+    get:
+      summary: Listar usuarios con paginación
+      tags:
+        - Users
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            example: 1
+          description: Número de página
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            example: 10
+          description: Cantidad de resultados por página
+      responses:
+        '200':
+          description: Lista paginada de usuarios
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: integer
+                    example: 50
+                  page:
+                    type: integer
+                    example: 1
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+        '401':
+          description: No autorizado
+  /api/users/{id}:
+    get:
+      summary: Obtener un usuario por ID
+      tags:
+        - Users
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: ID del usuario
+      responses:
+        '200':
+          description: Usuario encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: No autorizado
+        '404':
+          description: Usuario no encontrado
+    put:
+      summary: Actualizar un usuario completo
+      tags:
+        - Users
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
           required: true
           schema:
             type: integer
@@ -478,13 +356,79 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                done:
-                  type: boolean
-                  example: true
+              $ref: '#/components/schemas/UserInput'
       responses:
-        "200":
-          description: Tarea actualizada
-        "404":
-          description: Tarea no encontrada
+        '200':
+          description: Usuario actualizado
+        '400':
+          description: Datos inválidos
+        '401':
+          description: No autorizado
+        '404':
+          description: Usuario no encontrado
+    patch:
+      summary: Activar o desactivar un usuario
+      tags:
+        - Users
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Estado del usuario actualizado
+        '401':
+          description: No autorizado
+        '404':
+          description: Usuario no encontrado
+    delete:
+      summary: Eliminar un usuario
+      tags:
+        - Users
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Usuario eliminado
+        '401':
+          description: No autorizado
+        '404':
+          description: Usuario no encontrado
+  /api/users/{id}/tasks:
+    get:
+      summary: Obtener las tareas de un usuario
+      tags:
+        - Users
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: ID del usuario
+      responses:
+        '200':
+          description: Lista de tareas del usuario
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Task'
+        '401':
+          description: No autorizado
+        '404':
+          description: Usuario no encontrado
+tags: []
